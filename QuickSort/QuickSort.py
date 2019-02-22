@@ -24,6 +24,28 @@ def geraLista(tam):
         tam -= 1
     return lista
 
+def geraListaAleatoria(tam):
+	lista = []
+	while len(lista) < tam:
+		n = randint(1,1*tam)
+		if n not in lista: lista.append(n)
+	return lista
+
+def geraListaCresc(tam):
+    lista = []
+    i = 0
+    while i <= tam:
+        lista.append(i)
+        i+=1
+    return lista
+
+def geraListaDecresc(tam):
+    lista = []
+    while tam >= 0:
+        lista.append(tam)
+        tam-=1
+    return lista
+
 
 def partition(lst, start, end, pivot):
     lst[pivot], lst[end] = lst[end], lst[pivot]
@@ -49,9 +71,6 @@ def QuickSort(lst):
     quick_sort(lst, 0, len(lst) - 1)
     return lst
 
-lista = geraLista(100000)
-
-print(QuickSort(lista))
 
 def desenhaGrafico(x,y,xl,yl,label):
 	fig = plt.figure(figsize=(10, 8))
@@ -62,12 +81,42 @@ def desenhaGrafico(x,y,xl,yl,label):
 	plt.xlabel(xl)
 	fig.savefig(label)
     
-x = [1000000,2000000,3000000,4000000,5000000]
+x = [200000,400000,600000,800000,1000000]
+x1 = [10000,20000,30000,40000,50000]
 
 yCaso = []
+yPiorCaso = []
+yMedioCaso = []
+yMelhorCaso = []
+
+lista = [1, 2, 3, 4, 5, 6]
+listaPermutada = list(it.permutations(lista,6))
+tempos = []
 
 for i in x:
     lista = geraLista(i)
     yCaso.append(timeit.timeit('QuickSort({})'.format(lista),setup="from __main__ import QuickSort",number=1))
+    
+for i in x1:    
+    lista = geraListaDecresc(i)
+    yPiorCaso.append(timeit.timeit('QuickSort({})'.format(lista),setup="from __main__ import QuickSort",number=1))
+    
+    lista = geraListaAleatoria(i)
+    yMedioCaso.append(timeit.timeit('QuickSort({})'.format(lista),setup="from __main__ import QuickSort",number=1))
+    
+    lista = geraListaCresc(i)
+    yMelhorCaso.append(timeit.timeit('QuickSort({})'.format(lista),setup="from __main__ import QuickSort",number=1))
 
-desenhaGrafico(x,yCaso,'Quantidade','Tempo','Caso')    
+desenhaGrafico(x,yCaso,'Quantidade','Tempo','Caso')
+desenhaGrafico(x,yPiorCaso,'Quantidade','Tempo','PiorCaso')    
+desenhaGrafico(x,yMedioCaso,'Quantidade','Tempo','MedioCaso')    
+desenhaGrafico(x,yMelhorCaso,'Quantidade','Tempo','MelhorCaso')    
+
+for i in listaPermutada:
+    tempos.append(timeit.timeit('QuickSort({})'.format(listaPermutada),setup="from __main__ import QuickSort",number=1))
+    
+maxIdx = tempos.index(max(tempos))
+
+print('Tempo mais demorado:',max(tempos))
+print(listaPermutada[maxIdx])    
+    
