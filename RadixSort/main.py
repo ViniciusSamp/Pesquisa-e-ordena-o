@@ -1,31 +1,30 @@
-from random import randint
+import itertools as it
 import timeit
+import random
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import itertools as it
 
-mpl.use('Agg')
+def desenhaGrafico(x, y, graphLabel, fileName, xl = "Quantidade de números", yl = "Tempo"):
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111)
+    for i in range(3):
+        ax.plot(x, y[i], label = graphLabel[i])
+    ax.legend(bbox_to_anchor=(1, 1),bbox_transform=plt.gcf().transFigure)
+    plt.ylabel(yl)
+    plt.xlabel(xl)
+    fig.savefig(fileName)
 
-def geraListaAleatoria(tam):
-	lista = []
-	while len(lista) < tam:
-		n = randint(1,1*tam)
-		if n not in lista: lista.append(n)
-	return lista
-
-def geraListaCresc(tam):
+def geraListaInvertida(tam):
     lista = []
-    i = 0
-    while i <= tam:
-        lista.append(i)
-        i+=1
-    return lista
-
-def geraListaDecresc(tam):
-    lista = []
-    while tam >= 0:
+    while tam > 0:
         lista.append(tam)
         tam-=1
+    return lista
+
+def geraListaOrdenada(tam):
+    lista = []
+    for i in range(tam):
+        lista.append(i)
     return lista
 
 def CountingSort(array):
@@ -41,55 +40,51 @@ def CountingSort(array):
             i += 1
     return array
 
-def radixSort(array):
+def RadixSort(array):
     m = max(array)
     
     i = 1
     while(m/i > 0):
         CountingSort(array)
+        
         i*=10
 
 
-        
-def desenhaGrafico(x,y,xl,yl,label):
-	fig = plt.figure(figsize=(10, 8))
-	ax = fig.add_subplot(111)
-	ax.plot(x,y, label = 'radixSort')
-	ax.legend(bbox_to_anchor=(1, 1),bbox_transform=plt.gcf().transFigure)
-	plt.ylabel(yl)
-	plt.xlabel(xl)
-	fig.savefig(label)
-    
-x = [10000,20000,30000,40000,50000]
-
-yPiorCaso = []
-yMedioCaso = []
+x = [10000, 20000, 30000, 40000, 50000]
 yMelhorCaso = []
+yMedioCaso = []
+yPiorCaso = []
 
-lista = [1, 2, 3, 4, 5, 6]
-listaPermutada = list(it.permutations(lista,6))
+for i in x:
+    yMelhorCaso.append(timeit.timeit("RadixSort({})".format(geraListaOrdenada(i)),setup="from __main__ import RadixSort",number=1))
+    
+    lista = geraListaOrdenada(i)
+    random.shuffle(geraListaOrdenada(i))
+    yMedioCaso.append(timeit.timeit("RadixSort({})".format(lista), setup="from __main__ import RadixSort", number=1))
+
+    yPiorCaso.append(timeit.timeit("RadixSort({})".format(geraListaInvertida(i)),setup="from __main__ import RadixSort",number=1))
+
+casos = [yMelhorCaso, yMedioCaso, yPiorCaso]
+casosLabel = ['Melhor caso', 'Medio caso', 'Pior caso']
+desenhaGrafico(x, casos, casosLabel, 'RadixSortCasos.png')
+
+
+lista = list(it.permutations([1, 2, 3, 4, 5, 6], 6))
+listaAux = []
+listaPermut = []
+
+for i in lista:
+    listaAux.append(list(i))
+    listaPermut.append(list(i))
 
 tempos = []
 
-for i in x:
-    lista = geraListaDecresc(i)
-    yPiorCaso.append(timeit.timeit('radixSort({})'.format(lista),setup="from __main__ import radixSort",number=1))
-    
-    lista = geraListaAleatoria(i)
-    yMedioCaso.append(timeit.timeit('radixSort({})'.format(lista),setup="from __main__ import radixSort",number=1))
-    
-    lista = geraListaCresc(i)
-    yMelhorCaso.append(timeit.timeit('radixSort({})'.format(lista),setup="from __main__ import radixSort",number=1))
 
-desenhaGrafico(x,yPiorCaso,'Quantidade','Tempo','Pior_Caso')    
-desenhaGrafico(x,yMedioCaso,'Quantidade','Tempo','Medio_Caso')
-desenhaGrafico(x,yMelhorCaso,'Quantidade','Tempo','Melhor_Caso')
+for i in listaPermut:
+    tempos.append(timeit.timeit('RadixSort({})'.format(i),setup="from __main__ import RadixSort",number=50))
 
-
-for i in listaPermutada:
-    tempos.append(timeit.timeit('radixSort({})'.format(listaPermutada),setup="from __main__ import radixSort",number=1))
-    
 maxIdx = tempos.index(max(tempos))
+minIdx = tempos.index(min(tempos))
 
-print('Tempo mais demorado:',max(tempos))
-print(listaPermutada[maxIdx]) 
+print('Pior caso: ', listaAux[maxIdx])
+print('Melhor caso: ', listaAux[minIdx])
